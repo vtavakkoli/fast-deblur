@@ -14,7 +14,7 @@ services:
       - bash
       - -lc
       - >-
-        ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
+        bash ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
         ./build/fast-deblur-benchmark
         --data-dir /work/testdata/upstream/dataset/image
         --profiles /work/benchmark_profiles.json
@@ -31,7 +31,7 @@ services:
       - bash
       - -lc
       - >-
-        ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
+        bash ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
         ./build/fast-deblur-benchmark
         --data-dir /work/testdata/upstream/dataset/image
         --profiles /work/benchmark_profiles.json
