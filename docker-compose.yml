@@ -1,0 +1,38 @@
+services:
+  test:
+    build:
+      context: .
+    command: ["ctest", "--test-dir", "build", "--output-on-failure"]
+
+  benchmark-preview:
+    build:
+      context: .
+    volumes:
+      - ./testdata:/work/testdata
+      - ./report-preview:/work/report-preview
+    command:
+      - bash
+      - -lc
+      - >-
+        ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
+        ./build/fast-deblur-benchmark
+        --data-dir /work/testdata/upstream/dataset/image
+        --profiles /work/benchmark_profiles.json
+        --out /work/report-preview
+        --preview --limit 3
+
+  benchmark:
+    build:
+      context: .
+    volumes:
+      - ./testdata:/work/testdata
+      - ./report:/work/report
+    command:
+      - bash
+      - -lc
+      - >-
+        ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
+        ./build/fast-deblur-benchmark
+        --data-dir /work/testdata/upstream/dataset/image
+        --profiles /work/benchmark_profiles.json
+        --out /work/report
