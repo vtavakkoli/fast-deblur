@@ -1,0 +1,96 @@
+name: Bug report
+description: Report a reproducible build, runtime, numerical, or benchmark problem
+title: "[Bug]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please avoid uploading confidential images or security exploit details here.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Build / CMake
+        - CLI
+        - C++ library API
+        - Blind PSF estimation
+        - Final restoration
+        - Annealed PnP
+        - Dual-Extreme
+        - Docker
+        - Benchmark / report
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Include the exact command/API call and the smallest reproducible setup.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Repository commit
+      placeholder: git rev-parse HEAD
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, CPU, compiler, CMake, OpenCV, FFTW, thread settings, Docker version if relevant.
+      placeholder: |
+        OS: Ubuntu 24.04
+        CPU: ...
+        Compiler: GCC ...
+        OpenCV: ...
+        FFTW: ...
+        Threads: ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: docker
+    attributes:
+      label: Does the issue reproduce with Docker Compose?
+      options:
+        - Yes
+        - No
+        - Not tested
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or metrics
+      description: Paste error output or numerical diagnostics. Remove sensitive paths/data.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: This is not a security vulnerability with exploit details.
+          required: true
