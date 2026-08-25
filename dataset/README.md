@@ -1,15 +1,21 @@
-# Full `dataset/image` benchmark
+# Repository benchmark dataset
 
-The repository already contains **23 source images** under `dataset/image`, originating from the supplied CVPR 2016 dark-channel deblurring release.
+The repository contains **23 source images** under `dataset/image`, originating from the supplied CVPR 2016 dark-channel deblurring release.
 
-`docker compose run --rm test` validates and benchmarks **every supported file in that folder**. The original committed source files are never modified. For practical CI runtime, each image is resized only in memory to a maximum side length of 192 pixels before the three-method comparison is run.
+Docker benchmark services use this checked-in data directly. The complete `dataset/` directory is mounted read-only at `/work/dataset`; no network download or temporary `testdata/upstream` copy is required.
 
-For each source image the benchmark performs one blind dark-channel PSF estimation and then evaluates:
+Run the 3-image smoke benchmark with:
 
-- the dark-channel baseline restoration;
-- the new annealed Gaussian plug-and-play refinement;
-- the new extreme-channel guided refinement.
+```bash
+docker compose run --rm benchmark-preview
+```
 
-Both new refinements reuse the same baseline PSF so the report compares restoration priors under the same estimated blur model. Outputs, metrics and the final visual comparison are generated under `results/`.
+Run the full native-resolution 23-image benchmark with:
 
-Other folders under `dataset/` are preserved as historical/benchmark assets but are not part of this 23-image Docker smoke/research report.
+```bash
+docker compose run --rm benchmark
+```
+
+For each source image the benchmark performs an independent MATLAB-parity blind deblur and a robust blind dark-channel PSF estimation, then evaluates the robust baseline plus the Annealed PnP and Dual-Extreme refinements. The two refinement methods reuse the robust baseline PSF so their restoration priors are compared under the same estimated blur model.
+
+Generated outputs are written to `report-preview/` or `report/`; the committed source dataset is never modified. Other folders under `dataset/` are preserved as historical/reference assets and remain available to benchmark and validation code through the read-only dataset mount.
