@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   native-build:
-    name: Native CMake build, test and install
+    name: Native CMake build, test and package consumer
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -42,8 +42,20 @@ jobs:
       - name: Test
         run: ctest --preset release
 
-      - name: Validate installable package
+      - name: Install package
         run: cmake --install build/release --prefix "$RUNNER_TEMP/fast-deblur-install"
+
+      - name: Configure downstream package consumer
+        run: >-
+          cmake -S tests/package_consumer -B build/package-consumer -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/fast-deblur-install"
+
+      - name: Build downstream package consumer
+        run: cmake --build build/package-consumer --parallel
+
+      - name: Run downstream package consumer
+        run: ./build/package-consumer/fast-deblur-package-consumer
 
   docker-smoke:
     name: Docker tests and benchmark smoke report
@@ -80,8 +92,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build benchmark image
+        run: docker compose build benchmark
+
       - name: Run complete benchmark
-        run: docker compose run --rm --build benchmark
+        run: docker compose run --rm benchmark
 
       - name: Upload full benchmark report
         if: always()
