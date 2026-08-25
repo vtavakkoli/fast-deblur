@@ -56,9 +56,9 @@ Full native-resolution 23-image benchmark:
 docker compose run --rm benchmark
 ```
 
-The full report is written to `report/index.html`, with raw metrics in `report/metrics.csv` and generated images under `report/images/`.
+The benchmark reads the checked-in repository data directly from `dataset/image`. The complete `dataset/` directory is mounted read-only into the benchmark container, so historical/reference assets under `dataset/` remain available without downloading or rewriting them. No network fetch is required to run either benchmark service.
 
-The test-data fetcher is pinned to the inspected upstream AdaptiveBlindDeblur commit, downloads all 23 observed benchmark images plus the compact historical MATLAB/Python regression assets, and records the source commit in `testdata/upstream/UPSTREAM_COMMIT.txt`.
+The full report is written to `report/index.html`, with raw metrics in `report/metrics.csv` and generated images under `report/images/`.
 
 ## CLI
 
@@ -97,4 +97,4 @@ The report includes runtime, reblur RMSE and reference-free artifact diagnostics
 
 The benchmark does **not** feed legacy MATLAB/Python result pixels or kernels into inference. They are evaluation/history assets only. Blind deblurring has no unique solution in general, so visual sharpness alone is not treated as correctness; reblur consistency and artifact-growth diagnostics are shown together.
 
-This is experimental research software. For publication-quality comparisons, run the full benchmark on fixed hardware and preserve `metrics.csv`, the HTML report, compiler/container metadata, and the pinned upstream commit.
+This is experimental research software. For publication-quality comparisons, run the full benchmark on fixed hardware and preserve `metrics.csv`, the HTML report, compiler/container metadata, and the repository revision used for the run.
