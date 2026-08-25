@@ -5,6 +5,8 @@ type: software
 authors:
   - family-names: Tavakkoli
     given-names: Vahid
+  - family-names: Mohsenzadegan
+    given-names: Kabeh
 version: 0.2.0
 date-released: 2026-08-25
 repository-code: "https://github.com/vtavakkoli/fast-deblur"
