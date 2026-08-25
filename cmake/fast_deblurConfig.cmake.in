@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(OpenCV 4.5 COMPONENTS core imgproc imgcodecs photo)
+find_dependency(PkgConfig)
+pkg_check_modules(FFTW3 REQUIRED IMPORTED_TARGET fftw3)
+
+if(@FAST_DEBLUR_CONFIG_NEEDS_OPENMP@)
+    find_dependency(OpenMP)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/fast_deblurTargets.cmake")
+check_required_components(fast_deblur)
