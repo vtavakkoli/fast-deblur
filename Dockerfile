@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /work
 COPY . .
-RUN cmake -S . -B build -G Ninja \
+RUN chmod +x ./scripts/*.sh \
+ && cmake -S . -B build -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
       -DFAST_DEBLUR_NATIVE=OFF \
  && cmake --build build --parallel
