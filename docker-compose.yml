@@ -7,32 +7,70 @@ services:
   benchmark-preview:
     build:
       context: .
+    environment:
+      FAST_DEBLUR_PROGRESS_INTERVAL: "${FAST_DEBLUR_PROGRESS_INTERVAL:-10}"
     volumes:
       - ./dataset:/work/dataset:ro
       - ./report-preview:/work/report-preview
     command:
-      - ./build/fast-deblur-benchmark
-      - --data-dir
-      - /work/dataset/image
-      - --profiles
-      - /work/benchmark_profiles.json
-      - --out
-      - /work/report-preview
-      - --preview
-      - --limit
-      - "3"
+      - bash
+      - -lc
+      - |
+        interval="$${FAST_DEBLUR_PROGRESS_INTERVAL:-10}"
+        mkdir -p /work/report-preview/images
+        touch /tmp/fast-deblur-benchmark-start
+        echo "[fast-deblur] benchmark-preview starting"
+        echo "[fast-deblur] data=/work/dataset/image profiles=/work/benchmark_profiles.json out=/work/report-preview limit=3"
+        echo "[fast-deblur] progress heartbeat every $${interval}s"
+        stdbuf -oL -eL ./build/fast-deblur-benchmark \
+          --data-dir /work/dataset/image \
+          --profiles /work/benchmark_profiles.json \
+          --out /work/report-preview \
+          --preview --limit 3 &
+        pid=$$!
+        while kill -0 "$$pid" 2>/dev/null; do
+          generated=$$(find /work/report-preview/images -maxdepth 1 -type f -newer /tmp/fast-deblur-benchmark-start 2>/dev/null | wc -l | tr -d ' ')
+          latest=$$(find /work/report-preview/images -maxdepth 1 -type f -newer /tmp/fast-deblur-benchmark-start -printf '%T@ %f\n' 2>/dev/null | sort -nr | head -n 1 | cut -d' ' -f2-)
+          echo "[fast-deblur] $$(date -Iseconds) RUNNING pid=$$pid generated_files=$$generated latest=$${latest:-none}"
+          sleep "$$interval"
+        done
+        wait "$$pid"
+        status=$$?
+        generated=$$(find /work/report-preview/images -maxdepth 1 -type f -newer /tmp/fast-deblur-benchmark-start 2>/dev/null | wc -l | tr -d ' ')
+        echo "[fast-deblur] benchmark-preview finished exit=$$status generated_files=$$generated report=/work/report-preview/index.html"
+        exit "$$status"
 
   benchmark:
     build:
       context: .
+    environment:
+      FAST_DEBLUR_PROGRESS_INTERVAL: "${FAST_DEBLUR_PROGRESS_INTERVAL:-10}"
     volumes:
       - ./dataset:/work/dataset:ro
       - ./report:/work/report
     command:
-      - ./build/fast-deblur-benchmark
-      - --data-dir
-      - /work/dataset/image
-      - --profiles
-      - /work/benchmark_profiles.json
-      - --out
-      - /work/report
+      - bash
+      - -lc
+      - |
+        interval="$${FAST_DEBLUR_PROGRESS_INTERVAL:-10}"
+        mkdir -p /work/report/images
+        touch /tmp/fast-deblur-benchmark-start
+        echo "[fast-deblur] full benchmark starting"
+        echo "[fast-deblur] data=/work/dataset/image profiles=/work/benchmark_profiles.json out=/work/report"
+        echo "[fast-deblur] progress heartbeat every $${interval}s"
+        stdbuf -oL -eL ./build/fast-deblur-benchmark \
+          --data-dir /work/dataset/image \
+          --profiles /work/benchmark_profiles.json \
+          --out /work/report &
+        pid=$$!
+        while kill -0 "$$pid" 2>/dev/null; do
+          generated=$$(find /work/report/images -maxdepth 1 -type f -newer /tmp/fast-deblur-benchmark-start 2>/dev/null | wc -l | tr -d ' ')
+          latest=$$(find /work/report/images -maxdepth 1 -type f -newer /tmp/fast-deblur-benchmark-start -printf '%T@ %f\n' 2>/dev/null | sort -nr | head -n 1 | cut -d' ' -f2-)
+          echo "[fast-deblur] $$(date -Iseconds) RUNNING pid=$$pid generated_files=$$generated latest=$${latest:-none}"
+          sleep "$$interval"
+        done
+        wait "$$pid"
+        status=$$?
+        generated=$$(find /work/report/images -maxdepth 1 -type f -newer /tmp/fast-deblur-benchmark-start 2>/dev/null | wc -l | tr -d ' ')
+        echo "[fast-deblur] full benchmark finished exit=$$status generated_files=$$generated report=/work/report/index.html"
+        exit "$$status"
