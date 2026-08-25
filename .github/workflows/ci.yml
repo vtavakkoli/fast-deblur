@@ -75,7 +75,7 @@ jobs:
 
       - name: Upload HTML benchmark smoke report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: fast-deblur-preview-report
           path: report-preview/
@@ -100,7 +100,7 @@ jobs:
 
       - name: Upload full benchmark report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: fast-deblur-full-report
           path: report/
