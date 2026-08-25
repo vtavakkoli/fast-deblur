@@ -1,0 +1,62 @@
+name: Feature or research proposal
+description: Propose a new algorithm, optimization, API, benchmark, or tooling improvement
+title: "[Proposal]: "
+labels: []
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Numerical parity
+        - Robustness / artifact safety
+        - New restoration method
+        - PSF estimation
+        - Performance optimization
+        - C++ API / packaging
+        - CLI
+        - Benchmark / metrics
+        - Docker / CI
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What limitation or research question does this address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Describe the implementation or experiment at a level that can be reviewed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evaluation plan
+      description: How should the proposal be tested for quality, parity, runtime, or reproducibility?
+      placeholder: |
+        - affected benchmark cases
+        - metrics to compare
+        - expected runtime impact
+        - regression tests
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: inference
+    attributes:
+      label: Inference integrity
+      options:
+        - label: The proposal will not use legacy/reference pixels or kernels as hidden inference inputs.
+          required: true
+        - label: Any resize/crop or approximation will be reported explicitly rather than replacing the native-resolution benchmark silently.
+          required: true
