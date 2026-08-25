@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use fast-deblur in research, please cite this software and the original algorithms relevant to your experiment."
+title: "fast-deblur: High-Performance C++20 Adaptive Blind Image Deblurring"
+type: software
+authors:
+  - family-names: Tavakkoli
+    given-names: Vahid
+version: 0.2.0
+date-released: 2026-08-25
+repository-code: "https://github.com/vtavakkoli/fast-deblur"
+url: "https://github.com/vtavakkoli/fast-deblur"
+keywords:
+  - blind image deblurring
+  - blind deconvolution
+  - point spread function estimation
+  - image restoration
+  - computer vision
+  - C++20
+  - OpenCV
+  - FFTW
