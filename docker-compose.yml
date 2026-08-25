@@ -8,31 +8,31 @@ services:
     build:
       context: .
     volumes:
-      - ./testdata:/work/testdata
+      - ./dataset:/work/dataset:ro
       - ./report-preview:/work/report-preview
     command:
-      - bash
-      - -lc
-      - >-
-        bash ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
-        ./build/fast-deblur-benchmark
-        --data-dir /work/testdata/upstream/dataset/image
-        --profiles /work/benchmark_profiles.json
-        --out /work/report-preview
-        --preview --limit 3
+      - ./build/fast-deblur-benchmark
+      - --data-dir
+      - /work/dataset/image
+      - --profiles
+      - /work/benchmark_profiles.json
+      - --out
+      - /work/report-preview
+      - --preview
+      - --limit
+      - "3"
 
   benchmark:
     build:
       context: .
     volumes:
-      - ./testdata:/work/testdata
+      - ./dataset:/work/dataset:ro
       - ./report:/work/report
     command:
-      - bash
-      - -lc
-      - >-
-        bash ./scripts/fetch_upstream_testdata.sh /work/testdata/upstream &&
-        ./build/fast-deblur-benchmark
-        --data-dir /work/testdata/upstream/dataset/image
-        --profiles /work/benchmark_profiles.json
-        --out /work/report
+      - ./build/fast-deblur-benchmark
+      - --data-dir
+      - /work/dataset/image
+      - --profiles
+      - /work/benchmark_profiles.json
+      - --out
+      - /work/report
