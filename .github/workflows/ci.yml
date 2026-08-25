@@ -4,18 +4,75 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fast-deblur-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  docker-test:
-    runs-on: ubuntu-latest
+  native-build:
+    name: Native CMake build, test and package consumer
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            cmake \
+            libfftw3-dev \
+            libopencv-dev \
+            ninja-build \
+            nlohmann-json3-dev \
+            pkg-config
+
+      - name: Configure
+        run: cmake --preset release
+
+      - name: Build
+        run: cmake --build --preset release --parallel
+
+      - name: Test
+        run: ctest --preset release
+
+      - name: Install package
+        run: cmake --install build/release --prefix "$RUNNER_TEMP/fast-deblur-install"
+
+      - name: Configure downstream package consumer
+        run: >-
+          cmake -S tests/package_consumer -B build/package-consumer -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/fast-deblur-install"
+
+      - name: Build downstream package consumer
+        run: cmake --build build/package-consumer --parallel
+
+      - name: Run downstream package consumer
+        run: ./build/package-consumer/fast-deblur-package-consumer
+
+  docker-smoke:
+    name: Docker tests and benchmark smoke report
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Build test image
         run: docker compose build test
+
       - name: Run C++ tests
         run: docker compose run --rm test
+
       - name: Run 3-image benchmark smoke report
         run: docker compose run --rm benchmark-preview
+
       - name: Upload HTML benchmark smoke report
         if: always()
         uses: actions/upload-artifact@v4
@@ -23,3 +80,29 @@ jobs:
           name: fast-deblur-preview-report
           path: report-preview/
           if-no-files-found: warn
+          retention-days: 14
+
+  full-benchmark:
+    name: Full native-resolution benchmark
+    if: github.event_name == 'workflow_dispatch'
+    needs: [native-build, docker-smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build benchmark image
+        run: docker compose build benchmark
+
+      - name: Run complete benchmark
+        run: docker compose run --rm benchmark
+
+      - name: Upload full benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fast-deblur-full-report
+          path: report/
+          if-no-files-found: error
+          retention-days: 30

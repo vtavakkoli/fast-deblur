@@ -1,0 +1,27 @@
+# CMake / build outputs
+/build/
+/cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+compile_commands.json
+
+# Benchmark outputs
+/report/
+/report-preview/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Local artifacts
+*.log
+*.tmp

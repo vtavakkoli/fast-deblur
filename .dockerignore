@@ -1,0 +1,12 @@
+.git
+.github
+build
+cmake-build-*
+report
+report-preview
+dataset
+.vscode
+.idea
+*.log
+*.tmp
+.DS_Store

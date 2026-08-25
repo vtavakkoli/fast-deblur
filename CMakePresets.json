@@ -1,0 +1,58 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 22,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Portable optimized build for reproducible testing and packaging",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FAST_DEBLUR_NATIVE": "OFF",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "native",
+      "displayName": "Native Release",
+      "description": "Machine-specific optimized build with -march=native",
+      "inherits": "release",
+      "binaryDir": "${sourceDir}/build/native",
+      "cacheVariables": {
+        "FAST_DEBLUR_NATIVE": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "native",
+      "configurePreset": "native"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "native",
+      "configurePreset": "native",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}
