@@ -41,6 +41,7 @@ cv::Mat adjustPsfCenter(const cv::Mat& kernel);
 cv::Mat initKernel(int size);
 cv::Mat resizeKernel(const cv::Mat& kernel, double scale, int target_size);
 cv::Mat refinePsfStructure(const cv::Mat& kernel);
+cv::Mat trajectoryRegularizePsf(const cv::Mat& kernel);
 
 cv::Mat downsampleLevin(const cv::Mat& image, double ratio);
 cv::Mat l0DeblurDarkChannel(const cv::Mat& blurred, const cv::Mat& kernel,
