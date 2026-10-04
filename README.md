@@ -6,7 +6,7 @@
 ![Docker](https://img.shields.io/badge/Docker-reproducible-2496ED?logo=docker)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 
-**High-performance C++20 blind image deblurring with a MATLAB-parity path, robust PSF estimation, artifact-aware restoration, and reproducible native-resolution benchmarking.**
+**High-performance C++20 blind image deblurring with a MATLAB-parity path, robust PSF estimation, a motion-trajectory PSF prior, artifact-aware restoration, and reproducible native-resolution benchmarking.**
 
 `fast-deblur` is the C++ implementation companion to [`vtavakkoli/AdaptiveBlindDeblur`](https://github.com/vtavakkoli/AdaptiveBlindDeblur). It is designed for experiments where runtime matters, but numerical differences must remain visible and auditable rather than being hidden behind a single opaque “best” mode.
 
@@ -17,6 +17,7 @@
 - **C++20 production path** — no Python runtime is required for CLI or benchmark execution.
 - **MATLAB-parity mode** — preserves the translated legacy numerical path for regression and fidelity studies.
 - **Robust blind baseline** — adds PSF structure retention, structural cleanup, retry logic, and artifact guards.
+- **Motion-Trajectory-Prior PSF (MTP-PSF)** — projects diffuse blind PSFs toward a continuous exposure-time motion curve and suppresses off-path branches/noise.
 - **Two guarded refinements** — Annealed PnP and Dual-Extreme use the same independently estimated robust PSF.
 - **Native-resolution benchmark** — no hidden resize or crop in the quality benchmark.
 - **Reference-free diagnostics** — reblur consistency plus edge/noise/high-frequency/clipping growth.
@@ -28,11 +29,12 @@
 | Method | CLI | Purpose |
 |---|---|---|
 | Robust baseline | `--method baseline` | Multi-scale blind PSF estimation plus guarded final restoration |
+| Motion-Trajectory PSF | `--method trajectory` | Robust PSF estimate projected toward a smooth continuous motion path, then guarded restoration |
 | MATLAB-parity baseline | `--method baseline --matlab-parity` | Strict translated legacy path with robust selection/guards disabled |
 | Annealed PnP | `--method annealed-pnp` | Gaussian annealing, NLM prior, FFT blur-consistency projection, artifact-safe acceptance |
 | Dual-Extreme | `--method extreme-channel` | Dark/bright local-extrema guidance, detail recovery, FFT consistency, artifact guard |
 
-See [`docs/METHODS.md`](docs/METHODS.md) for the numerical mapping and design rationale.
+See [`docs/METHODS.md`](docs/METHODS.md) for the numerical mapping and design rationale, and [`docs/MOTION_TRAJECTORY.md`](docs/MOTION_TRAJECTORY.md) for the new movement-path prior.
 
 ## Quick start
 
@@ -120,6 +122,17 @@ Basic restoration:
   --kernel-size 65
 ```
 
+Motion-trajectory constrained restoration:
+
+```bash
+./build/release/fast-deblur \
+  --input blurry.png \
+  --output trajectory-restored.png \
+  --kernel-output trajectory-kernel.png \
+  --method trajectory \
+  --kernel-size 65
+```
+
 Strict translated legacy path:
 
 ```bash
@@ -174,9 +187,14 @@ auto result = fast_deblur::deblur(
     fast_deblur::Method::Baseline
 );
 
-// result.image  : restored CV_32FC3 image in [0, 1]
-// result.kernel : normalized estimated PSF
-// result.latent : last grayscale latent estimate
+auto trajectory = fast_deblur::deblurMotionTrajectory(
+    rgb_float_image,
+    config
+);
+
+// result.image      : restored CV_32FC3 image in [0, 1]
+// result.kernel     : normalized estimated PSF
+// trajectory.kernel : motion-path-constrained PSF
 ```
 
 After installation, downstream CMake projects can use:
@@ -194,12 +212,7 @@ cmake --install build/release --prefix ./install
 
 ## Benchmark contract
 
-`fast-deblur-benchmark` reads `benchmark_profiles.json` and evaluates the repository’s native-resolution benchmark set. The report separates:
-
-1. strict MATLAB-parity C++ baseline;
-2. robust C++ baseline;
-3. Annealed PnP refinement;
-4. Dual-Extreme refinement.
+`fast-deblur-benchmark` reads `benchmark_profiles.json` and evaluates the repository’s native-resolution benchmark set. The existing report separates strict MATLAB-parity C++, robust C++ baseline, Annealed PnP, and Dual-Extreme. The new trajectory method is intentionally opt-in while its full-dataset behavior is being validated.
 
 The report includes runtime, reblur RMSE, and reference-free artifact diagnostics. Reference/legacy pixels and kernels are used only for historical comparison where available; they are never used to choose a PSF or restoration candidate.
 
@@ -228,6 +241,8 @@ latent/gradient optimization ↔ PSF update
   ↓
 PSF cleanup / optional robust retry
   ↓
+optional Motion-Trajectory PSF projection
+  ↓
 full-quality restoration
   ↓
 optional PnP or Dual-Extreme refinement
@@ -252,6 +267,7 @@ Benchmark results should always include the repository revision, compiler/contai
 ## Documentation
 
 - [`docs/METHODS.md`](docs/METHODS.md) — algorithms and numerical modes
+- [`docs/MOTION_TRAJECTORY.md`](docs/MOTION_TRAJECTORY.md) — movement-path PSF constraint
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — code and data flow
 - [`docs/BENCHMARKING.md`](docs/BENCHMARKING.md) — benchmark contract and interpretation
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — development workflow
@@ -279,4 +295,4 @@ If this software contributes to research, please cite the repository metadata in
 
 ## Acknowledgment and lineage
 
-This repository is the high-performance C++ companion to [`AdaptiveBlindDeblur`](https://github.com/vtavakkoli/AdaptiveBlindDeblur). The project intentionally separates **parity**, **robustness**, and **refinement** modes so improvements can be measured without rewriting history.
+This repository is the high-performance C++ companion to [`AdaptiveBlindDeblur`](https://github.com/vtavakkoli/AdaptiveBlindDeblur). The project intentionally separates **parity**, **robustness**, **trajectory constraints**, and **refinement** modes so improvements can be measured without rewriting history.

@@ -23,6 +23,11 @@ struct ArtifactDiagnostics {
 };
 
 DeblurResult deblur(const cv::Mat& image, const DeblurConfig& config = {}, Method method = Method::Baseline);
+DeblurResult deblurMotionTrajectory(const cv::Mat& image, const DeblurConfig& config = {});
+DeblurResult applyMotionTrajectoryPrior(
+    const cv::Mat& image,
+    const DeblurResult& baseline,
+    const DeblurConfig& config = {});
 cv::Mat refine(const cv::Mat& observed, const cv::Mat& baseline, const cv::Mat& kernel, Method method);
 cv::Mat reblur(const cv::Mat& image, const cv::Mat& kernel);
 ArtifactDiagnostics artifactDiagnostics(const cv::Mat& observed, const cv::Mat& candidate);

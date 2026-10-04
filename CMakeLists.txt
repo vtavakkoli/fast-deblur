@@ -28,6 +28,8 @@ set(FAST_DEBLUR_SOURCES
     src/boundary.cpp
     src/dark_channel.cpp
     src/kernel.cpp
+    src/trajectory.cpp
+    src/trajectory_api.cpp
     src/optimization.cpp
     src/quality.cpp
     src/refinement.cpp
